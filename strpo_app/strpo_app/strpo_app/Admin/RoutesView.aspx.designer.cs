@@ -22,22 +22,31 @@ namespace strpo_app.Admin {
         protected global::System.Web.UI.WebControls.GridView gridView_routes;
         
         /// <summary>
-        /// textBox_name control.
+        /// linkButton_back control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox textBox_name;
+        protected global::System.Web.UI.WebControls.LinkButton linkButton_back;
         
         /// <summary>
-        /// textBox_description control.
+        /// label_curPage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox textBox_description;
+        protected global::System.Web.UI.WebControls.Label label_curPage;
+        
+        /// <summary>
+        /// linkButton_forward control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton linkButton_forward;
         
         /// <summary>
         /// button_add control.
@@ -56,5 +65,23 @@ namespace strpo_app.Admin {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl statusLabel;
+        
+        /// <summary>
+        /// SortBy control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField SortBy;
+        
+        /// <summary>
+        /// SortDir control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField SortDir;
     }
 }

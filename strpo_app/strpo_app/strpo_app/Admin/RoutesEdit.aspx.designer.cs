@@ -13,31 +13,13 @@ namespace strpo_app.Admin {
     public partial class WebForm1 {
         
         /// <summary>
-        /// label control.
+        /// routesControl control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl label;
-        
-        /// <summary>
-        /// textBox_name control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox textBox_name;
-        
-        /// <summary>
-        /// textBox_description control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox textBox_description;
+        protected global::strpo_app.Admin.RoutesControl routesControl;
         
         /// <summary>
         /// button_update control.

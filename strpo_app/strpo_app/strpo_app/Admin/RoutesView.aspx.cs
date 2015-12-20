@@ -11,17 +11,94 @@ namespace strpo_app.Admin
 {
     public partial class Routes : System.Web.UI.Page
     {
+        private int CurrentPage
+        {
+            get { return (int)ViewState["CurrentPage"]; }
+            set { ViewState["CurrentPage"] = value; }
+        }
+
+        private int PageCount
+        {
+            get { return (int)ViewState["PageCount"]; }
+            set { ViewState["PageCount"] = value; }
+        }
+
+        private int PageSize
+        {
+            get { return (int)ViewState["PageSize"]; }
+            set { ViewState["PageSize"] = value; }
+        }
+
+        private void InitPager()
+        {
+            SqlConnection conn = new SqlConnection(DefaultConnection);
+            SqlCommand cmd = new SqlCommand("SELECT count(*) FROM [Routes]", conn);
+
+            conn.Open();
+            int recordsCount = (int)cmd.ExecuteScalar();
+            conn.Close();
+
+            // Initing fields
+            PageSize = 4;
+            CurrentPage = 0;
+            PageCount = recordsCount / PageSize + (recordsCount % PageSize != 0 ? 1 : 0);
+        }
+
+        private string DefaultConnection
+        {
+            get
+            {
+                return System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            }
+        }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if(!IsPostBack)
             {
-                SqlDataSource ds = new SqlDataSource(
-                    System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString,
-                    "select * from Routes");
-                gridView_routes.DataSource = ds;
-                gridView_routes.DataBind();
+                InitPager();
             }
+            DataUpdate();
+        }
+
+        private void DataUpdate()
+        {
+            // Table update
+            string[] fields = new string[] { "Name", "Description", "Begin_stop", "End_stop" };
+            string[] dirs = new string[] { "asc", "desc" };
+
+            string sortField = fields[0];
+            if (!string.IsNullOrEmpty(SortBy.Value))
+            {
+                sortField = fields[int.Parse(SortBy.Value)];
+            }
+
+            string sortDir = dirs[0];
+            if (!string.IsNullOrEmpty(SortDir.Value))
+            {
+                sortDir = dirs[int.Parse(SortDir.Value)];
+            }
+
+            int startRow = CurrentPage * PageSize + 1;
+            int endRow = (CurrentPage + 1) * PageSize;
+
+            string sql = string.Format(@"select * from (select row_number() 
+                over(order by t0.{0} {1}) as row_number,
+                t0.Name,
+                t0.Description,
+                t0.Begin_stop,
+                t0.End_stop
+                from RoutesStopNames AS t0) as t1 where t1.row_number between {2} and {3}",
+                sortField, sortDir, startRow, endRow);
+
+            SqlDataSource ds = new SqlDataSource(DefaultConnection, sql);
+            gridView_routes.DataSource = ds;
+            gridView_routes.DataBind();
+
+            // Pager update
+            label_curPage.Text = string.Format("page {0} of {1}", CurrentPage + 1, PageCount);
+            linkButton_forward.Enabled = CurrentPage < PageCount - 1;
+            linkButton_back.Enabled = CurrentPage > 0;
         }
 
         protected void gridView_routes_RowDeleting(object sender, GridViewDeleteEventArgs e)
@@ -42,56 +119,40 @@ namespace strpo_app.Admin
                     {
                         conn.Open();
                         comm.ExecuteNonQuery();
-                        gridView_routes.DataBind();
+                        DataUpdate();
                         statusLabel.InnerText = "Deleted succesfill";
                     }
-                    catch (SqlException ex)
+                    catch (SqlException)
                     {
                         statusLabel.InnerText = "Delete error";
                     }
                 }
             }
-        }
 
-        protected void button_add_Click(object sender, EventArgs e)
-        {
-            string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-            string query = "INSERT INTO [Routes] (Name,Description) values (@name,@description)";
-
-            using (SqlConnection conn = new SqlConnection(connStr))
-            {
-                using (SqlCommand comm = new SqlCommand())
-                {
-                    comm.Connection = conn;
-                    comm.CommandType = CommandType.Text;
-                    comm.CommandText = query;
-                    comm.Parameters.AddWithValue("@name", textBox_name.Text);
-                    comm.Parameters.AddWithValue("@description", textBox_description.Text);
-
-                    try
-                    {
-                        conn.Open();
-                        comm.ExecuteNonQuery();
-
-                        gridView_routes.DataBind();
-                        textBox_name.Text = "";
-                        textBox_description.Text = "";
-
-                        statusLabel.InnerText = "Inserted succesfill";
-                    }
-                    catch (SqlException ex)
-                    {
-                        statusLabel.InnerText = "Insert error";
-                    }
-                }
-            }
+            DataUpdate();
         }
 
         protected void gridView_routes_RowEditing(object sender, GridViewEditEventArgs e)
         {
-            Response.Redirect(String.Format("RoutesEdit.aspx?name={0}&description={1}",
-                (string)gridView_routes.DataKeys[e.NewEditIndex].Values["Name"],
-                (string)gridView_routes.DataKeys[e.NewEditIndex].Values["Description"]));
+            Response.Redirect(String.Format("RoutesEdit.aspx?name={0}",
+                (string)gridView_routes.DataKeys[e.NewEditIndex].Values["Name"]));
+        }
+
+        protected void button_add_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("RoutesAdd.aspx");
+        }
+
+        protected void linkButton_back_Click(object sender, EventArgs e)
+        {
+            CurrentPage--;
+            DataUpdate();
+        }
+
+        protected void linkButton_forward_Click(object sender, EventArgs e)
+        {
+            CurrentPage++;
+            DataUpdate();
         }
     }
 }
